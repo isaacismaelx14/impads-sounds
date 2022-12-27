@@ -1,59 +1,56 @@
-<script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+<script lang="ts">
+	import Pad from '../components/Pad.svelte';
+	import { onMount } from 'svelte';
+	import type { IAudioItem } from './page';
+	
+	let items: IAudioItem[] = [];
+
+	onMount(() => {
+		const input = document.querySelector<HTMLInputElement>('#audioInput');
+		if (!input) return;
+
+		input.addEventListener('change', () => {
+			if (!input.files?.length) return;
+			const { name } = input.files[0];
+			const id = `${name.replaceAll(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}`;
+			const src = URL.createObjectURL(input.files[0]);
+
+			items.push({ id, src, name });
+			items = [...items];
+		});
+	});
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>I'm all hears</title>
 </svelte:head>
 
 <section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
+	<input type="file" accept="audio/*" id="audioInput" />
 
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
+	<ul class="leads">
+		{#each items as item}
+			<li>
+				<Pad {item} />
+			</li>
+		{/each}
+	</ul>
 </section>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
+	.leads {
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		list-style-type: none;
+		margin: 0 auto;
+		margin-block: 50px;
+		max-width: 700px;
+		padding: 0;
 	}
 
-	h1 {
+	.leads li {
 		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
+		height: 120px;
 	}
 </style>
